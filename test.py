@@ -42,7 +42,7 @@ def run_command(remote_host: Union[Endpoint, List[Endpoint]], process: str, comm
 if __name__ == '_main_':
     print(run_command(Endpoint('192.168.182.129', 'Tal', 'babygirl'), 'powershell.exe', 'echo kaki > C:\\moshe.txt'))
 
-    c = Client("hostname", username="username", password="password")
+    c = Client("192.168.182.129", username="Tal", password="babygirl")
     c.connect()
     try:
         c.create_service()
