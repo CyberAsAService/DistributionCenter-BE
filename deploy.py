@@ -41,22 +41,3 @@ def run_command(remote_host: Union[Endpoint, List[Endpoint]], process: str, comm
 
 if __name__ == '_main_':
     print(run_command(Endpoint('192.168.182.129', 'Tal', 'babygirl'), 'powershell.exe', 'echo kaki > C:\\moshe.txt'))
-
-    c = Client("192.168.182.129", username="Tal", password="babygirl")
-    c.connect()
-    try:
-        c.create_service()
-
-        # After creating the service, you can run multiple exe's without
-        # reconnecting
-
-        # run a simple cmd.exe program with arguments
-        print(c.run_executable("cmd.exe",
-                               arguments="/c echo Hello World"))
-
-        # run whoami.exe as the SYSTEM account
-        print(c.run_executable("whoami.exe", run_elevated=True))
-
-    finally:
-        c.remove_service()
-        c.disconnect()
