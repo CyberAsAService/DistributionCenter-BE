@@ -19,22 +19,20 @@ def _run_subprocess(remote_host: Endpoint, process: str, command: str) -> subpro
                                            remote_host=remote_host.ip_address,
                                            process=process,
                                            command=command)
-
+    print(process_command)
     return subprocess.Popen(process_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 
-def run_command(remote_host: Union[Endpoint, List[Endpoint]], process: str, command: str) -> List[Tuple[int, Any]]:
+def run_command(remote_host: Endpoint, process: str, command: str) -> Tuple[int, Any, Any]:
     """
     :param remote_host:
     :param process:
     :param command:
     :return:
     """
-    if type(remote_host) == Endpoint:
-        remote_host = [remote_host]
 
-    processes = [_run_subprocess(host, process, command) for host in remote_host]
-    return [(process.wait(), (*process.communicate())) for process in processes]
+    process = _run_subprocess(remote_host, process, command)
+    return process.wait(), (*process.communicate())
 
 
 if __name__ == '_main_':
