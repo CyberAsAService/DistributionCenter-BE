@@ -1,5 +1,5 @@
 import flask
-from flask import request, abort
+from flask import request, abort, jsonify
 from endpoint import Endpoint
 import subprocess as sp
 
@@ -10,7 +10,7 @@ BF_FORMAT = './Bruteforcer.sh -a {address} -u {user}'
 
 @app.route('/bf', methods=['POST'])
 def bruteforce():
-    if not request.json or not 'address' in request.json or not 'username' in request.json:
+    if not request.json or 'address' not in request.json or 'username' not in request.json:
         abort(400)
     # TODO -> Allow multiple endpoints
     endpoint = Endpoint(request.json['address'], request.json['username'], '')
@@ -34,7 +34,7 @@ def bruteforce():
             msg += "\nBackdoor created successfully on " + endpoint.ip_address
     else:
         abort(400, "unknown error:{}".format(stderr))
-    return msg
+    return jsonify(message=msg)
 
 
 @app.route('/')
