@@ -3,8 +3,6 @@ from typing import Union, List, Tuple, Any
 
 from endpoint import Endpoint
 
-from pypsexec.client import Client
-
 WMI_FORMAT = 'wmic /user:{user} /password:{password} /node:{remote_host} process call create '
 PSEXEC_FORMAT = 'PsExec.exe \\\\{remote_host} -u {remote_host}\\{user} -p {password} -accepteula -h {process} \"{command}\" '
 
