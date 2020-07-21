@@ -6,13 +6,14 @@ in
 	a) rhosts=${OPTARG};;
 esac
 done
-rm -f msf_fingerprint_output.txt
-msfconsole -q -x "spool msf_fingerprint_output.txt;\
-		use auxiliary/scanner/smb/smb_version;\
+results=$(msfconsole -q -x "use auxiliary/scanner/smb/smb_version;\
 		set RHOSTS "$rhosts";\
 		set VERBOSE true;\
 		set DBGTRACE true;\
-		run;exit;spool off;"
-grep  "\[[+]\]" ./msf_fingerprint_output.txt | grep -oP "(?<=Host is running).*build:\d*\)"
-
-
+		run;exit" | grep  "\[[+]\]")
+while IFS= read -r line; do
+	ip=$(echo $line | grep -oP "\d+\.\d+\.\d+\.\d+")
+	os=$(echo $line |grep -oP "(?<=Host is running).*build:\d*\)")
+	echo "ip: "$ip" os:"$os""
+done <<< "$results"
+exit
