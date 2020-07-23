@@ -23,4 +23,4 @@ AD permission Requirements:
   One user with Admin Access to all endpoints whom are managed by the domain
   one user with Admin Access to all (but DC's and other HIGH RISK FACTOR servers) servers whom are managed by the domain
   
-  ![alt text](https://github.com/Talanger/DistributionCenter/master/Architecture/sequence-diagram.jpg?raw=true)
+  ![Sequence Diagram](./Architecture/sequence-diagram.jpg?raw=true)
