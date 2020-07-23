@@ -1,0 +1,60 @@
+----- tasks -----
+
+GET /task
+Parameter: status
+Return all the user's task
+[{
+  flow_id: ''
+  status: ''
+  result: {},  
+},
+...]
+
+POST /task
+BODY: {
+	payload: text/file.ps1
+	targets: endpoints
+	target_regex: regex
+}
+Return flow_id or error
+
+DELETE /task/{flow_id}
+deletes the task if the user is the creator else error
+Return boolean
+
+----- tasks -----
+******************************************************************************
+----- groups -----
+
+GET /group/{groupName/id}
+Return all the user's groups filtered by name or id
+[{
+},
+...
+]
+
+POST /group
+BODY: {
+groupName:
+}
+Return all the user's groups
+[{
+},
+...
+]
+
+PUT /group
+BODY: 
+{
+group_id: ''
+members:[]
+endpoints:[]
+}
+return true or error
+
+----- groups -----
+******************************************************************************
+----- users -----
+
+POST /user/{user_id}
+adds the user or return error if already exists
