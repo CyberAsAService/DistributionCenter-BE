@@ -17,4 +17,46 @@ Frontend -> Backend: Flow id status
 Frontend <- Backend : Task status/output
 User <- Frontend: Show status/output
 @enduml
----------------------------------------------------
+
+------ Main architecture
+@startuml
+package "Web" {
+  HTTP - [Frontend]
+  [Backend]
+  [Frontend] -> [Backend]
+}
+
+node "Task" {
+  [Backend] -> [TaskManager]
+  [TaskManager] --> [Scheduler]
+}
+
+
+node "Storage" {
+  FTP - [Storage Manager]
+  [TaskManager] - FTP 
+}
+
+node "Execution" {
+  [Executor] - WMI
+  [TaskManager] --> [Executor]
+}
+
+node "Login" {
+  [LoginManager] - LAPS
+  [LoginManager] -- [CrackingService]
+  [TaskManager] -> [LoginManager]
+}
+
+database "Metadata" {
+  folder "Endpoints" {
+  }
+  folder "Files Metadata" {
+  }
+  folder "Taks" {
+  }
+
+}
+
+[TaskManager] --> Metadata
+@enduml
