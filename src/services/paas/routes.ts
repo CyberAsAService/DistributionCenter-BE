@@ -12,9 +12,10 @@ export default [
       // steps - steps to take in PAAS 
       const response = (await axios.post('http://localhost:5000/PaaS', {
         ip_address: req.body.address,
-        username: "Administrator" ?  "Administrator":req.body.username,
+        username: req.body.username ? req.body.username : "Administrator",
         steps: req.body.steps
       })).data;
+
       res.json(response);
     }
   },
