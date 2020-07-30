@@ -33,5 +33,13 @@ export default [
     handler: async (req: Request, res: Response) => {
       res.send(null);
     }
-  }
+  },
+  {
+    path: "/task",
+    method: "patch",
+    handler: async (req: Request, res: Response) => {
+      console.log(req.body);
+      res.send(null);
+    }
+  },
 ];
