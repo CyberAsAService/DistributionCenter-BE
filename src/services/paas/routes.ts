@@ -23,6 +23,13 @@ export default [
     path: "/PaaS",
     method: "patch",
     handler: async (req: Request, res: Response) => {
+      /* 
+          tasks = get all tasks of this endpoint
+          if success
+            execute all tasks
+          else
+            fail all tasks
+      */
       console.log(req.body);
       res.json(true);
     }

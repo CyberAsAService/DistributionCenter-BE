@@ -13,6 +13,17 @@ export default [
     path: "/task",
     method: "post",
     handler: async (req: Request, res: Response) => {
+      /* 
+        add task metadata to db
+        if permissions steps is empty: execute, return task_id
+
+        check if there are permission tasks running on this endpoint:
+          return existing PaaS task_id
+        else
+          call PaaS, return PaaS task_id
+      */
+
+
       // parameters
       // req.body.payload
       // req.body.targets
