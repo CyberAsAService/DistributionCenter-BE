@@ -17,14 +17,19 @@ export default [
       // req.body.payload
       // req.body.targets
       // req.body.target_regex
-      const response = (await axios.post('http://localhost:5000/execute', {
+      const responsePaaS = (await axios.post('http://localhost:5000/PaaS', {
+        ip_address: req.body.address,
+        username: req.body.username ? req.body.username : "Administrator",
+        steps: req.body.steps
+      })).data;
+      const responseExecute = (await axios.post('http://localhost:5000/execute', {
         ip_address: req.body.targets,
-        username: 'kaki',
-        password: '123',
+        username: 'Witcher',
+        password: 'Switcher',
         process: 'powershell.exe',
         command: req.body.payload,
       })).data;
-      res.json(response);
+      res.json(responseExecute);
     }
   },
   {

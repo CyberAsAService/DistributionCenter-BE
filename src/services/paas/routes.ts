@@ -19,5 +19,12 @@ export default [
       res.json(response);
     }
   },
-
+  {
+    path: "/PaaS",
+    method: "patch",
+    handler: async (req: Request, res: Response) => {
+      console.log(req.body);
+      res.json(true);
+    }
+  }
 ];
