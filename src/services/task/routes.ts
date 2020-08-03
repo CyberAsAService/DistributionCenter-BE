@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 const axios = require('axios')
-
+function sleep(millis:number) {
+  return new Promise(resolve => setTimeout(resolve, millis));
+}
 export default [
   {
     path: "/task",
@@ -24,38 +26,49 @@ export default [
       */
 
 
-      // parameters
+      // parametersc
       // req.body.payload
       // req.body.targets
       // req.body.target_regex
-      const responsePaaS = (await axios.post('http://localhost:5000/PaaS', {
-        ip_address: req.body.address,
+      if(req.body.steps)
+      {
+      const responsePaaS = (await axios.post('http://192.168.40.130:5000/PaaS', {
+        address: req.body.address,
         username: req.body.username ? req.body.username : "Administrator",
         steps: req.body.steps
       })).data;
-      const responseExecute = (await axios.post('http://localhost:5000/execute', {
-        ip_address: req.body.targets,
-        username: 'Witcher',
-        password: 'Switcher',
-        process: 'powershell.exe',
-        command: req.body.payload,
-      })).data;
-      res.json(responseExecute);
+      responsePaaS.type = "PaaS"
+      //TODO -> SAVE TO DB
+      return responsePaaS;
     }
-  },
+  
+  else
+  {
+    const responseExecute = (await axios.post('http://localhost:5001/execute', {
+    ip_address: req.body.address,
+    username: 'Witcher',
+    password: 'Switcher',
+    process: 'powershell',
+    command: req.body.payload,
+  })).data;
+    responseExecute.type = "EaaS"
+    // TODO -> SAVE TO DB
+    return responseExecute;
+  }
+  }},
   {
     path: "/task/:flow_id",
     method: "delete",
     handler: async (req: Request, res: Response) => {
       res.send(null);
     }
-  },
-  {
+    },
+    {
     path: "/task",
     method: "patch",
     handler: async (req: Request, res: Response) => {
-      console.log(req.body);
+      //console.log(req.body);
       res.send(null);
     }
-  },
+    },
 ];

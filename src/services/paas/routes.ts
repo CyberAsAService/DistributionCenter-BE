@@ -4,23 +4,6 @@ const axios = require('axios')
 export default [
   {
     path: "/PaaS",
-    method: "post",
-    handler: async (req: Request, res: Response) => {
-      // parameters
-      // req.body.address - by ip/ class c
-      // username - Default is Administrator
-      // steps - steps to take in PAAS 
-      const response = (await axios.post('http://localhost:5000/PaaS', {
-        ip_address: req.body.address,
-        username: req.body.username ? req.body.username : "Administrator",
-        steps: req.body.steps
-      })).data;
-
-      res.json(response);
-    }
-  },
-  {
-    path: "/PaaS",
     method: "patch",
     handler: async (req: Request, res: Response) => {
       /* 
@@ -30,8 +13,31 @@ export default [
           else
             fail all tasks
       */
-      console.log(req.body);
-      res.json(true);
+     const responseExecute = (await axios.post('http://localhost:5001/execute', {
+      ip_address: req.body.address,
+      username: 'Witcher',
+      password: 'Switcher',
+      process: 'powershell',
+      command: req.body.payload,
+    })).data;
+      responseExecute.type = "EaaS"
+      // TODO -> SAVE TO DB
+      return responseExecute;
     }
-  }
+  },
+  {
+    path: "/PaaS/Status",
+    method: "post",
+    handler: async (req: Request, res: Response) => {
+    let statusPaaS = (await axios.get(`http://192.168.40.130:5000/status/${req.body.task_id}`)).data;
+    if(statusPaaS["status"] == "SUCCESS")
+    {
+      //TODO -> return executer task_id from db
+      return "shit";
+    }
+    else
+    {
+      return statusPaaS;
+    }
+    }},
 ];
