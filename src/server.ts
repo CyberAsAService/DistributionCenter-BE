@@ -4,6 +4,8 @@ import express from "express";
 import { applyMiddleware, applyRoutes } from "./utils";
 import middleware from "./middleware";
 import routes from "./services";
+import "reflect-metadata";
+
 
 const router = express();
 applyMiddleware(middleware, router);
