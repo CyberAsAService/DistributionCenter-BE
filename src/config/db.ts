@@ -1,4 +1,6 @@
-const pgp = require('pg-promise')();
+const pgp = require('pg-promise')({
+  query(e:any){console.log(e.query + "\n");}
+});
 
 const connection = {
   host: process.env.DB_HOST, // 'localhost' is the default;

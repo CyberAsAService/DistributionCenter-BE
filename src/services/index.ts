@@ -1,4 +1,5 @@
 import taskRoutes from "./task/routes";
 import userRoutes from "./users/routes";
 import groupRoutes from "./group/routes";
-export default [...taskRoutes, ...userRoutes, ...groupRoutes,];
+import paasRoutes from "./paas/routes";
+export default [...taskRoutes, ...userRoutes, ...groupRoutes, ...paasRoutes];
