@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 const axios = require('axios')
+import db from "../../config/db";
+
 export default [
     {
         path: "/Executer/Status",
@@ -16,4 +18,27 @@ export default [
           return statusExecuter;
         }
         }},
+
+        {
+          path: "/Executer",
+          method: "patch",
+          handler: async (req: Request, res: Response) => {
+            if(req.body.executer)
+            {
+              await db.none('UPDATE public."Steps" SET endtime=CURRENT_TIMESTAMP, status=${status} WHERE microtask_id = ${step_id}',
+              {
+                status: 'RUNNING',
+                step_id: req.body.task_id,
+              });
+            }
+            else{
+              await db.none('UPDATE public."Steps" SET endtime=CURRENT_TIMESTAMP, status=${status} WHERE microtask_id = ${step_id}',
+              {
+                status: req.body.status,
+                step_id: req.body.task_id,
+              });
+            }
+            res.json(true);
+            }
+          },
 ];

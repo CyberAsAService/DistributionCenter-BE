@@ -6,14 +6,6 @@ export default [
     path: "/PaaS",
     method: "patch",
     handler: async (req: Request, res: Response) => {
-      /* 
-          tasks = get all tasks of this endpoint
-          if success
-            execute all tasks
-          else
-            fail all tasks
-      */
-      //if success run on all endpoints
       await db.none(
         'UPDATE public."Steps" SET endtime=CURRENT_TIMESTAMP, status=${status} WHERE microtask_id = ${step_id}',
         {
@@ -22,17 +14,38 @@ export default [
         }
       );
       if (req.body.success) {
-        console.log(await db.any('select * from public."Tasks" where id in (select task_id from public."Subtasks" where endpoint_id = (select endpoint_id from public."Endpoints" where ip = ${ip}))', {ip:req.body.address}))
-        /*const responseExecute = (
-          await axios.post("http://localhost:5001/execute", {
-            ip_address: req.body.address,
-            username: "Witcher",
-            password: "Switcher",
-            process: "powershell",
-            command: req.body.payload,
-          })
-        ).data;*/
+        //TODO -> run only pending tasks
+        const tasks = (await db.many(`select tasks.id, tasks.command, endpoint_id 
+        from public."Tasks" as tasks 
+        right join public."Subtasks" as subtasks 
+        on subtasks.task_id = tasks.id
+        where endpoint_id in (select endpoint_id from public."Endpoints" where ip = $<ip>)` , {ip:req.body.address}));
+        
+        //TODO - > Only one instance of spesific command on an enndpoint at any given time.
+        tasks.forEach(async (element:any) => {
+          let responseExecute = (
+            await axios.post("http://localhost:5001/execute", {
+              ip_address: req.body.address,
+              username: "Witcher",
+              password: "Switcher",
+              process: "powershell",
+              command: element.command,
+            })
+          ).data;
+          await db.none(
+            'INSERT INTO public."Steps"(task_id, status, starttime, endpoint_id, endtime, type, args, microtask_id) VALUES (${task_id}, ${status},CURRENT_TIMESTAMP, ${endpoint_id}, NULL, ${type}, ${args}, ${microtask_id})',
+            {
+              task_id: element.id,
+              status: "Pending",
+              endpoint_id: element.endpoint_id,
+              type: "executer",
+              args: req.body.steps,
+              microtask_id: responseExecute.task_id,
+            }
+          );
+        });
       }
+    res.json(true);
     },
   },
   {

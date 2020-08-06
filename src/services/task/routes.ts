@@ -33,11 +33,18 @@ export default [
 
       const id = await db.one(
         'INSERT INTO public."Tasks"( user_id, command) VALUES ( ${user_id}, ${command}) returning id',
-        { user_id: 1, command: req.body.payload }
+        { user_id: 1, command: req.body.payload}
       );
       if (!id) {
         res.status(500).send("Couldn't start task");
       }
+      //TODO -> Multiple endpoints
+      const subtasks = await db.none('INSERT INTO public."Subtasks"( task_id, endpoint_id, status, result) VALUES ( ${task_id}, ${endpoint_id}, ${status}, NULL)', {
+        task_id: id.id,
+        //TODO-> get from user
+        endpoint_id: 1,
+        status: 'PENDING'
+      })
       if (req.body.steps) {
         let responsePaaS = await db.oneOrNone(
           'select microtask_id from public."Steps" where endpoint_id = ${endpoint_id} and type=${type} and endtime is null limit 1',
