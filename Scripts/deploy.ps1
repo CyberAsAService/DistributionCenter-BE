@@ -1,18 +1,11 @@
-﻿param(
-    [Parameter(Mandatory=$true)][string]$downloadUrl,
-    [Parameter(Mandatory=$true)][string]$output,
-    [Parameter(Mandatory=$true)][string]$uploadUrl
-)
-$start_time = Get-Date
-if($PSVersionTable.PSVersion.Major -gt 2)
+﻿if($PSVersionTable.PSVersion.Major -gt 2)
 {
-    
     try{
         Invoke-WebRequest -Uri $downloadUrl -OutFile $output
         Write-host("Download Completed")
         try{
-            $postParams = @{package='test';status='success'}
-            Invoke-WebRequest -Uri $uploadUrl -Method POST -Body $($postParams|ConvertTo-Json) -ContentType "application/json"
+            $PATCHParams = @{package='test';status='success'}
+            Invoke-WebRequest -Uri $uploadUrl -Method PATCH -Body $($PATCHParams|ConvertTo-Json) -ContentType "application/json"
             Write-host("upload Completed")
         }
         catch
@@ -22,8 +15,8 @@ if($PSVersionTable.PSVersion.Major -gt 2)
     }
     catch{
         Write-host("Download Failed")
-        $postParams = @{package='test';status='failed'}
-        Invoke-WebRequest -Uri $uploadUrl -Method POST -Body $($postParams|ConvertTo-Json) -ContentType "application/json"
+        $PATCHParams = @{package='test';status='failed'}
+        Invoke-WebRequest -Uri $uploadUrl -Method PATCH -Body $($PATCHParams|ConvertTo-Json) -ContentType "application/json"
     }
 }
 else{
@@ -37,10 +30,10 @@ else{
     try{
         $webClient.Headers.add('ContentType','application/json')
         $webClient.Headers.add('dataType','json')
-        $postParams = New-Object System.Collections.Specialized.NameValueCollection
-        $postParams.Add("package","test")
-        $postParams.Add("status","success")
-        $WebClient.UploadValues("uploadUrl", "POST", $postParams)
+        $PATCHParams = New-Object System.Collections.Specialized.NameValueCollection
+        $PATCHParams.Add("package","test")
+        $PATCHParams.Add("status","success")
+        $WebClient.UploadValues("uploadUrl", "PATCH", $PATCHParams)
         Write-Host "Upload succeded"
    
         }
@@ -53,10 +46,10 @@ else{
     Write-host("Download Failed")
         $webClient.Headers.add('ContentType','application/json')
         $webClient.Headers.add('dataType','json')
-        $postParams = New-Object System.Collections.Specialized.NameValueCollection
-        $postParams.Add("package","test")
-        $postParams.Add("status","fail")
-        $HtmlResult = $WebClient.UploadValues($uploadUrl, "POST", $postParams);
+        $PATCHParams = New-Object System.Collections.Specialized.NameValueCollection
+        $PATCHParams.Add("package","test")
+        $PATCHParams.Add("status","fail")
+        $HtmlResult = $WebClient.UploadValues($uploadUrl, "PATCH", $PATCHParams);
         write-host $HtmlResult
     }
         
@@ -68,14 +61,13 @@ else{
         if ($job.Contains("Transfer"))
         {
             Write-host("Download Completed")
-            #TODO -> send json as post request(no invoke-webrequest as version < 2
+            #TODO -> send json as PATCH request(no invoke-webrequest as version < 2
         }
         else
         {
          Write-host("Download Failed, error is in $job")
-            #TODO -> send json as post request(no invoke-webrequest as version < 3
+            #TODO -> send json as PATCH request(no invoke-webrequest as version < 3
         }
 
     }
 }
-Write-Output "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)"

