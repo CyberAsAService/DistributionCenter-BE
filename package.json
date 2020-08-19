@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsc-watch --onSuccess \"node ./dist/server.js\""
+    "dev": "tsc-watch --onSuccess \"node ./dist/server.js\"",
+    "tsc": "tsc"
   },
   "keywords": [],
   "author": "",
@@ -22,9 +23,12 @@
     "lib": "^4.3.0",
     "pg-promise": "^10.5.8",
     "tsc-watch": "^1.1.39",
-    "typescript": "^3.9.7"
+    "typescript": "^3.9.7",
+    "bluebird": "3.7.2",
+    "pg-monitor": "1.4.1"
   },
   "devDependencies": {
-    "@types/node": "^10.17.28"
+    "@types/node": "^10.17.28",
+    "copyfiles": "^2.3.0"
   }
 }

@@ -1,6 +1,6 @@
 const pgp = require('pg-promise')();
 
-const connection = {
+export const connection = {
   host: process.env.DB_HOST, // 'localhost' is the default;
   port: process.env.DB_PORT, // 5432 is the default;
   database: process.env.DB_DATABASE,
