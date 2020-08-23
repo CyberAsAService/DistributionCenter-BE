@@ -1,5 +1,5 @@
 import { IExtensions } from '../utils/models';
-import { IInitOptions, IDatabase, IMain } from 'pg-promise';
+import { IDatabase } from 'pg-promise';
 import { IConnectionParameters, IClient } from 'pg-promise/typescript/pg-subset';
 
 type ExtendedProtocol = IDatabase<IExtensions> & IExtensions;
@@ -15,7 +15,7 @@ const connection = {
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD
 };
+
 const db: ExtendedProtocol = pgp((connection as IConnectionParameters<IClient>));
-//  const db = pgp(connection);
 
 export default db;
