@@ -50,7 +50,7 @@ export default [
               username: 'Witcher',
               password: 'Switcher',
               process: 'powershell.exe',
-              command: `powershell.exe -command "iex(New-Object Net.WebClient).DownloadString('http://${process.env.BE_IDENTIFIER}:${process.env.PORT}/repo/scripts?hash=${hash}')"`,
+              command: `(New-Object Net.WebClient).DownloadString('http://${process.env.BE_IDENTIFIER}:${process.env.PORT}/repo/scripts?hash=${hash}').Replace('ï»¿', '').Replace('<insert args here>', '$downloadUrl = "' + "${req.body.downloadUrl}" + '";$output="' +'${req.body.output}'+'";$uploadUrl="' + "${req.body.uploadUrl}" + '";') | iex`,
             })).data;
             response[address]['executeResponse'] = responseExecute;
           } catch (error) {

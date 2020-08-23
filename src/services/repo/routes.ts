@@ -27,14 +27,28 @@ var dirreader = function(dir:string){
     });
 };
 dirreader(directoryPath);
-console.log(scripts);
 export default [
     {
         path: "/repo/scripts",
         method: "get",
         handler: async (req: Request, res: Response) => {
-            console.log(req.query.hash);
             res.send(scripts.get(req.query.hash));   
         }
     }
+    ,
+    {
+        path: "/repo/deployer",
+        method: "patch",
+        handler: async (req: Request, res: Response) => {
+          /* 
+              tasks = get all tasks of this endpoint
+              if success
+                execute all tasks
+              else
+                fail all tasks
+          */
+          console.log(req.body);
+          res.json(true);
+        }
+      }
 ];

@@ -1,22 +1,29 @@
-﻿if($PSVersionTable.PSVersion.Major -gt 2)
+﻿<insert args here>
+[Net.ServicePointManager]::SecurityProtocol = 'Tls'
+
+if($PSVersionTable.PSVersion.Major -gt 2)
 {
+    
     try{
         Invoke-WebRequest -Uri $downloadUrl -OutFile $output
         Write-host("Download Completed")
         try{
-            $PATCHParams = @{package='test';status='success'}
-            Invoke-WebRequest -Uri $uploadUrl -Method PATCH -Body $($PATCHParams|ConvertTo-Json) -ContentType "application/json"
+            $postParams = @{package='test';status='success'}
+            Invoke-WebRequest -Uri $uploadUrl -Method PATCH -Body $($postParams|ConvertTo-Json) -ContentType "application/json"
             Write-host("upload Completed")
+            Start-Process -FilePath $output
+
         }
         catch
         {
             Write-host("Upload Failed")
+            Start-Process -FilePath $output
         }
     }
     catch{
         Write-host("Download Failed")
-        $PATCHParams = @{package='test';status='failed'}
-        Invoke-WebRequest -Uri $uploadUrl -Method PATCH -Body $($PATCHParams|ConvertTo-Json) -ContentType "application/json"
+        $postParams = @{package='test';status='failed'}
+        Invoke-WebRequest -Uri $uploadUrl -Method PATCH -Body $($postParams|ConvertTo-Json) -ContentType "application/json"
     }
 }
 else{
@@ -30,44 +37,35 @@ else{
     try{
         $webClient.Headers.add('ContentType','application/json')
         $webClient.Headers.add('dataType','json')
-        $PATCHParams = New-Object System.Collections.Specialized.NameValueCollection
-        $PATCHParams.Add("package","test")
-        $PATCHParams.Add("status","success")
-        $WebClient.UploadValues("uploadUrl", "PATCH", $PATCHParams)
+        $postParams = New-Object System.Collections.Specialized.NameValueCollection
+        $postParams.Add("package","test")
+        $postParams.Add("status","success")
+        $HtmlResult = $WebClient.UploadValues($uploadUrl, "PATCH", $postParams);
         Write-Host "Upload succeded"
-   
+        Start-Process -FilePath $output
         }
     catch
     {
         Write-Host "Upload failed"
+        Start-Process -FilePath $output
     }
     }
     catch{
+        try{
     Write-host("Download Failed")
         $webClient.Headers.add('ContentType','application/json')
         $webClient.Headers.add('dataType','json')
-        $PATCHParams = New-Object System.Collections.Specialized.NameValueCollection
-        $PATCHParams.Add("package","test")
-        $PATCHParams.Add("status","fail")
-        $HtmlResult = $WebClient.UploadValues($uploadUrl, "PATCH", $PATCHParams);
+        $postParams = New-Object System.Collections.Specialized.NameValueCollection
+        $postParams.Add("package","test")
+        $postParams.Add("status","fail")
+        $HtmlResult = $WebClient.UploadValues($uploadUrl, "PATCH", $postParams);
         write-host $HtmlResult
     }
-        
-    }
-    else
+            
+    catch
     {
-        #should never get here, as we have only windows 7+ in compliance, which has powershell v2 has default, but nth
-        $job = bitsadmin /transfer myDownloadJob /download /priority normal $downloadUrl $output
-        if ($job.Contains("Transfer"))
-        {
-            Write-host("Download Completed")
-            #TODO -> send json as PATCH request(no invoke-webrequest as version < 2
-        }
-        else
-        {
-         Write-host("Download Failed, error is in $job")
-            #TODO -> send json as PATCH request(no invoke-webrequest as version < 3
-        }
-
+        Write-Host "Upload failed"
     }
+        
+    }}
 }
