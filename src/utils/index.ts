@@ -1,4 +1,5 @@
 import { Router, Request, Response, NextFunction } from "express";
+const crypto = require('crypto');
 
 type Wrapper = ((router: Router) => void);
 
@@ -41,4 +42,8 @@ export const validateAddress = (address: string) => {
   }
 
 
+export const hashPayload = (payload: string) => {
+  return crypto.createHmac('sha256', payload)
+    .update('I love Witcher')
+    .digest('hex');
 }
