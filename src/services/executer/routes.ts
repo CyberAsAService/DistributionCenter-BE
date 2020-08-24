@@ -1,7 +1,7 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import * as controller from './executer-controller';
 import { LooseObject } from '../../utils/models';
-
+import { pinger } from '../../middleware/checks';
 const axios = require('axios')
 
 export default [{
@@ -24,7 +24,9 @@ export default [{
       {
         path: "/Executer",
         method: "patch",
-        handler: [async (req: Request, res: Response) => {
+        handler: [
+          pinger,
+          async (req: Request, res: Response, next: NextFunction) => {
           let params: LooseObject = {step_id: req.body.task_id};
           
           if(req.body.executer) {
