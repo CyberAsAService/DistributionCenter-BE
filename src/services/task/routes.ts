@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { hashPayload } from "../../utils/index"
 const axios = require('axios')
 import { validateAddress } from "../../utils/index"
 
@@ -31,6 +32,7 @@ export default [
       // req.body.target_regex
 
       //final response mapping {name:response}
+      let hash = hashPayload(req.body.payload);
       let response: { [key: string]: any } = {};
       let status = 200; // OK as default
       req.body.addresses.forEach(async (address: string) => {
