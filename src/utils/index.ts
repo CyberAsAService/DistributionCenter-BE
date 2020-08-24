@@ -29,3 +29,15 @@ export const applyRoutes = (routes: Route[], router: Router) => {
     (router as any)[method](path, handler);
   }
 };
+
+export const validateAddress = (address: string) => {
+  const IP_REGEX = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+  if (IP_REGEX.test(address)) {
+    return true;
+  } else {
+    // TODO: add testing for endpoint name (in the domain)
+    return false;
+  }
+
+
+}
