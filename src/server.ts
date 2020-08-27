@@ -6,7 +6,6 @@ import middleware from "./middleware";
 import routes from "./services";
 import db from "./config/db";
 
-
 const router = express();
 applyMiddleware(middleware, router);
 applyRoutes(routes, router);

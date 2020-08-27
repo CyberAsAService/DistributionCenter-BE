@@ -1,0 +1,114 @@
+version: '3.7'
+services:
+    redis:
+        image: 'redis:5.0.5'
+        restart: always
+        command: redis-server --requirepass redispass
+        networks:
+          - redis_net
+          - flower_net
+
+    postgres:
+        image: postgres:9.6
+        restart: always
+        environment:
+            - POSTGRES_USER=
+            - POSTGRES_PASSWORD=
+            - POSTGRES_DB=
+        # Uncomment these lines to persist data on the local filesystem.
+            - PGDATA=/var/lib/postgresql/data/pgdata
+        volumes:
+            - ./pgdata:/var/lib/postgresql/data/pgdata
+        networks:
+            - postgres_net
+    
+    backend:
+        image: dc_back:latest
+        restart: always
+        # TODO determine if depends_on in good here (we might want the backend to work if one of the microservices is down...)
+        depends_on:
+            - postgres
+            - paas
+            - executor
+        environment:
+            - LOAD_EX=n
+            - FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
+            - EXECUTOR=Celery
+            # - POSTGRES_USER=airflow
+            # - POSTGRES_PASSWORD=airflow
+            # - POSTGRES_DB=airflow
+            # - REDIS_PASSWORD=redispass
+        volumes:
+            - ./dags:/usr/local/airflow/dags
+            # Uncomment to include custom plugins
+            # - ./plugins:/usr/local/airflow/plugins
+        networks:
+          - postgres_net
+          - frontend_net
+          - paas_net
+          - executor_net
+    
+    frontend:
+        image: dc_front:latest
+        restart: always
+        environment:
+            - LOAD_EX=n
+        volumes:
+            - ./dags:/usr/local/airflow/dags
+        ports:
+            - "80:80"
+            - "443:443"
+        networks:
+            - frontend_net
+            
+    # TODO
+    paas:
+        image: dc_paas:latest
+        restart: always
+        depends_on:
+            - redis
+        environment:
+            - LOAD_EX=n
+        volumes:
+            - ./dags:/usr/local/airflow/dags
+        networks:
+          - paas_net
+          - redis_net
+
+    # TODO
+    executor:
+        image: dc_execute:latest
+        restart: always
+        depends_on:
+            - redis
+        environment:
+            - LOAD_EX=n
+        volumes:
+            - ./dags:/usr/local/airflow/dags
+        networks:
+          - executor_net
+          - redis_net
+
+    # TODO
+    flower:
+        image: mher/flower
+        restart: always
+        depends_on:
+            - redis
+        environment:
+            - REDIS_PASSWORD=redispass
+        ports:
+            - "5555:5555"
+        networks:
+          - flower_net
+
+networks:
+  redis_net:
+  postgres_net:
+  frontend_net:
+  paas_net:
+  executor_net:
+  flower_net:
+  
+volumes:
+  db_data:
