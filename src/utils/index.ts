@@ -36,6 +36,7 @@ export const validateAddress = (address: string) => {
     return true;
   } else {
     // TODO: add testing for endpoint name (in the domain)
+    // @TODO -> return error(invalid ip, dns...)
     return false;
   }
 

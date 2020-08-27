@@ -35,10 +35,8 @@ export default [
       let status = 200; // OK as default
       req.body.addresses.forEach(async (address: string) => {
         response[address] = { paasResponse: null, executeResponse: null };
-        if (!validateAddress(address)) {
-          // TODO determine the proper way to handle error
-          status = 422; // Unprocessable Entity 
-        } else {
+        //@TODO-> return to user lists of invalid endpoints + reason
+        if (validateAddress(address)) {
           try {
             const responsePaaS = (await axios.post('http://192.168.36.128:5000/PaaS', {
               address: address,
@@ -57,17 +55,11 @@ export default [
             response[address]['executeResponse'] = responseExecute;
           } catch (error) {
             // Passes errors into the error handler
-            // TODO determine if to show error code for one failing endpoint or not
-            status = 422; // Unprocessable Entity 
             console.log(error);
           }
-          finally {
-            res.status(status).json(response);
-          }
-
         }
-
       });
+      res.json(response);
     }
   },
   {
