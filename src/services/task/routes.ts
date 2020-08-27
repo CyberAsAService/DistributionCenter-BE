@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 const axios = require('axios')
+import { validateAddress } from "../../utils/index"
 
 export default [
   {
@@ -28,19 +29,37 @@ export default [
       // req.body.payload
       // req.body.targets
       // req.body.target_regex
-      const responsePaaS = (await axios.post('http://localhost:5000/PaaS', {
-        ip_address: req.body.address,
-        username: req.body.username ? req.body.username : "Administrator",
-        steps: req.body.steps
-      })).data;
-      const responseExecute = (await axios.post('http://localhost:5000/execute', {
-        ip_address: req.body.targets,
-        username: 'Witcher',
-        password: 'Switcher',
-        process: 'powershell.exe',
-        command: req.body.payload,
-      })).data;
-      res.json(responseExecute);
+
+      //final response mapping {name:response}
+      let response: { [key: string]: any } = {};
+      let status = 200; // OK as default
+      req.body.addresses.forEach(async (address: string) => {
+        response[address] = { paasResponse: null, executeResponse: null };
+        //@TODO-> return to user lists of invalid endpoints + reason
+        if (validateAddress(address)) {
+          try {
+            const responsePaaS = (await axios.post('http://192.168.36.128:5000/PaaS', {
+              address: address,
+              username: req.body.username ? req.body.username : "Administrator",
+              steps: req.body.steps
+            })).data;
+            response[address]['paasResponse'] = responsePaaS;
+
+            const responseExecute = (await axios.post('http://localhost:5001/execute', {
+              address: address,
+              username: 'Witcher',
+              password: 'Switcher',
+              process: 'powershell.exe',
+              command: req.body.payload,
+            })).data;
+            response[address]['executeResponse'] = responseExecute;
+          } catch (error) {
+            // Passes errors into the error handler
+            console.log(error);
+          }
+        }
+      });
+      res.json(response);
     }
   },
   {
