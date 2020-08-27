@@ -20,7 +20,9 @@
     "dotenv": "^8.2.0",
     "express": "^5.0.0-alpha.7",
     "lib": "^4.3.0",
+    "morgan": "^1.10.0",
     "pg-promise": "^10.5.8",
+    "ping": "^0.2.3",
     "tsc-watch": "^1.1.39",
     "typescript": "^3.9.7"
   },

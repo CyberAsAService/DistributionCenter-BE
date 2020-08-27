@@ -1,7 +1,9 @@
-import { Request, Response } from "express";
-const axios = require('axios')
 import db from "../../config/db";
-
+import { Request, Response, NextFunction } from 'express';
+import * as controller from './executer-controller';
+import { LooseObject } from '../../utils/models';
+import { pinger } from '../../middleware/checks';
+const axios = require('axios')
 export default [
   {
     path: "/Executer/Status",
@@ -24,23 +26,18 @@ export default [
   {
     path: "/Executer",
     method: "patch",
-    handler: async (req: Request, res: Response) => {
-      //console.log(req.body)
-      if (req.body.executer) {
-        await db.none('UPDATE public."Steps" SET endtime=CURRENT_TIMESTAMP, status=${status} WHERE microtask_id = ${step_id}',
-          {
-            status: 'RUNNING',
-            step_id: req.body.task_id,
-          });
+    handler: [
+      pinger,
+      async (req: Request, res: Response, next: NextFunction) => {
+      let params: LooseObject = {step_id: req.body.task_id};
+      
+      if(req.body.executer) {
+        params.status = 'RUNNING';
+      } else {
+        params.status = req.body.status;
       }
-      else {
-        await db.none('UPDATE public."Steps" SET endtime=CURRENT_TIMESTAMP, status=${status} WHERE microtask_id = ${step_id}',
-          {
-            status: req.body.status,
-            step_id: req.body.task_id,
-          });
+        const data = await controller.Executer(params);
+        res.status(200).json(true);
       }
-      res.json(true);
-    }
-  },
+    ]},
 ];

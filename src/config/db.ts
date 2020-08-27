@@ -1,4 +1,12 @@
-const pgp = require('pg-promise')();
+import { IExtensions } from '../utils/models';
+import { IDatabase } from 'pg-promise';
+import { IConnectionParameters, IClient } from 'pg-promise/typescript/pg-subset';
+
+type ExtendedProtocol = IDatabase<IExtensions> & IExtensions;
+
+const pgp = require('pg-promise')({
+  query(e:any){console.log(e.query + "\n");}
+});
 
 const connection = {
   host: process.env.DB_HOST, // 'localhost' is the default;
@@ -8,6 +16,6 @@ const connection = {
   password: process.env.DB_PASSWORD
 };
 
-const db = pgp(connection);
+const db: ExtendedProtocol = pgp((connection as IConnectionParameters<IClient>));
 
 export default db;
