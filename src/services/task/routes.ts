@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
+import * as controller from "./task-controller";
 import db from "../../config/db";
 import { hashPayload } from "../../utils/index";
 import { validateAddress } from "../../utils/index";
+import { LooseObject } from "../../utils/models";
 const axios = require("axios");
 function sleep(millis: number) {
   return new Promise((resolve) => setTimeout(resolve, millis));
@@ -32,15 +34,13 @@ export default [
       // req.body.payload
       // req.body.targets
       // req.body.target_regex
-      const id = await db.one(
-        'INSERT INTO public."Tasks"( user_id, command) VALUES ( ${user_id}, ${command}) returning id',
-        { user_id: 1, command: req.body.payload }
-      );
+      const id = await controller.createTask({ user_id: 1, command: req.body.payload })
+
       if (!id) {
         res.status(500).send("Couldn't start task");
       }
       let hash = hashPayload(req.body.payload);
-      let response: { [key: string]: any } = {};
+      let response: LooseObject = {};
       let status = 200; // OK as default
       req.body.addresses.forEach(async (address: string) => {
         response[address] = { paasResponse: null, executeResponse: null };
