@@ -1,0 +1,21 @@
+@startuml
+[*] --> Created
+Created --> QueuedForPermissions
+Created --> QueuedForExecute: Requested to skip permissions
+QueuedForPermissions --> Permissions
+Permissions --> QueuedForExecute: Success
+Permissions --> UpForRetryPermissions: Fail
+Permissions --> Failed: Fail after x times
+
+
+QueuedForExecute --> Execute
+Execute --> Finished: Success
+Execute --> UpForRetryExecution: Fail
+Execute --> Failed: Fail after x times
+
+UpForRetryExecution --> QueuedForExecute : If execution failed
+UpForRetryPermissions --> QueuedForPermissions : If Permissions failed
+
+Finished --> [*]
+Failed--> [*]
+@enduml
