@@ -43,6 +43,7 @@ export const validateAddress = (address: string) => {
     // @TODO -> return error(invalid ip, dns...)
     return false;
   }
+}
 
 
 export const hashPayload = (payload: string) => {
