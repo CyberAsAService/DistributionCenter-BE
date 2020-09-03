@@ -7,17 +7,20 @@ export default [
     path: "/PaaS",
     method: "patch",
     handler: async (req: Request, res: Response) => {
+      // @TODO: (sub)task = UpForRetryPermissions if failed 
+      // @TODO: make permission succeed?
       controller.updateStep({
         status: req.body.success ? "success" : "failed",
         step_id: req.body.task_id,
       });
 
       if (req.body.success) {
-        //TODO -> run only pending tasks
+        //TODO@TalShafir #29 -> run only pending tasks
         const tasks: any[] = await controller.getTasks({ ip: req.body.address });
-        
-        //TODO - > Only one instance of spesific command on an enndpoint at any given time.
-        tasks.forEach(async (element:any) => {
+
+        //TODO - > Only one instance of specific command on an enndpoint at any given time.
+        // @TODO: (sub)task = QueuedForExecute 
+        tasks.forEach(async (element: any) => {
           let responseExecute = (
             await axios.post("http://localhost:5001/execute", {
               ip_address: req.body.address,
@@ -36,8 +39,9 @@ export default [
             microtask_id: responseExecute.task_id,
           });
         });
+
       }
-    res.json(true);
+      res.json(true);
     },
   },
   {
