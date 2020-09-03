@@ -46,15 +46,13 @@ export default [
         response[address] = { paasResponse: null, executeResponse: null };
         //@TODO-> return to user lists of invalid endpoints + reason
         if (validateAddress(address)) {
-          const subtasks = await db.none(
-            'INSERT INTO public."Subtasks"( task_id, endpoint_id, status, result) VALUES ( ${task_id}, ${endpoint_id}, ${status}, NULL)',
-            {
-              task_id: id.id,
-              //TODO-> get from user
-              endpoint_id: 1,
-              status: "PENDING",
-            }
-          );
+          await controller.insertSubtask({
+            task_id: id.id,
+            //TODO-> get from user
+            endpoint_id: 1,
+            status: "PENDING",
+          });
+
           try {
             if (req.body.steps) {
               let responsePaaS = await db.oneOrNone(
