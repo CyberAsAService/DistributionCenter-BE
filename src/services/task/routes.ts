@@ -54,7 +54,7 @@ export default [
             task_id: id.id,
             //@TODO-> get from user
             endpoint_id: 1,
-            status: "PENDING",
+            status: "Created",
           });
 
           try {
