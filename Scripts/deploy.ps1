@@ -1,23 +1,24 @@
 ﻿<insert args here>
 [Net.ServicePointManager]::SecurityProtocol = 'Tls'
-
+[bool] $downloaded = $false
 if($PSVersionTable.PSVersion.Major -gt 2)
 {
     
     try{
         Invoke-WebRequest -Uri $downloadUrl -OutFile $output
+        [bool] $downloaded = $true
         Write-host("Download Completed")
         try{
             $postParams = @{package='test';status='success'}
             Invoke-WebRequest -Uri $uploadUrl -Method PATCH -Body $($postParams|ConvertTo-Json) -ContentType "application/json"
             Write-host("upload Completed")
-            Start-Process -FilePath $output
+            
 
         }
         catch
         {
             Write-host("Upload Failed")
-            Start-Process -FilePath $output
+            
         }
     }
     catch{
@@ -34,6 +35,7 @@ else{
     try{
     $WebClient.DownloadFile($downloadUrl, $output)
     Write-host("Download Completed")
+    [bool] $downloaded = $true
     try{
         $webClient.Headers.add('ContentType','application/json')
         $webClient.Headers.add('dataType','json')
@@ -42,12 +44,10 @@ else{
         $postParams.Add("status","success")
         $HtmlResult = $WebClient.UploadValues($uploadUrl, "PATCH", $postParams);
         Write-Host "Upload succeded"
-        Start-Process -FilePath $output
         }
     catch
     {
         Write-Host "Upload failed"
-        Start-Process -FilePath $output
     }
     }
     catch{
@@ -68,4 +68,12 @@ else{
     }
         
     }}
+}
+
+Write-Host $downloaded
+if($downloaded -eq $true)
+{
+
+    Write-Host "Opening downloaded file"
+    start -FilePath $output
 }
