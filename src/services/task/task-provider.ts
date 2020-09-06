@@ -11,3 +11,9 @@ export const insertSubtask = async (params: LooseObject) => {
     await db.none('INSERT INTO public."Subtasks"( task_id, endpoint_id, status, result) VALUES ( ${task_id}, ${endpoint_id}, ${status}, NULL)', 
                     params);
 };
+
+export const getSubtask = async (params: LooseObject) => {
+    return await db.one(
+        'SELECT * FROM public."Tasks" where (task_id is null OR task_id = ${id})',
+        params);
+};

@@ -8,3 +8,7 @@ export const createTask = async (params: LooseObject) => {
 export const insertSubtask = async (params: LooseObject) => {
     await provider.insertSubtask(params);
 };
+
+export const getSubtask = async (params: LooseObject) => {
+    return provider.getSubtask(params);
+};

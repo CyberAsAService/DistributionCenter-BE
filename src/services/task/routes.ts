@@ -10,10 +10,11 @@ function sleep(millis: number) {
 }
 export default [
   {
-    path: "/task",
+    path: "/subtask/:taskid",
     method: "get",
     handler: async (req: Request, res: Response) => {
-      res.send("Hello world!");
+      const subtask = controller.getSubtask({id: req.params.taskid});
+      res.status(200).send(subtask);
     },
   },
   {
@@ -128,4 +129,12 @@ export default [
       res.send(null);
     },
   },
+  {
+    path: "/task",
+    method: "patch",
+    handler: async (req: Request, res: Response) => {
+      //console.log(req.body);
+      res.send(null);
+    },
+  }
 ];
