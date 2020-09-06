@@ -1,8 +1,10 @@
 @startuml
 [*] --> Created
+[*] --> Failed: Failed to create
 Created --> QueuedForPermissions
 Created --> QueuedForExecute: Requested to skip permissions
 QueuedForPermissions --> Permissions
+Created --> Permissions: Permission task already running
 Permissions --> QueuedForExecute: Success
 Permissions --> UpForRetryPermissions: Fail
 Permissions --> Failed: Fail after x times

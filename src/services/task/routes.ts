@@ -35,9 +35,12 @@ export default [
       // req.body.payload
       // req.body.targets
       // req.body.target_regex
+
+
       const id = await controller.createTask({ user_id: 1, command: req.body.payload })
 
       if (!id) {
+        // @TODO: task = Failed
         res.status(500).send("Couldn't start task");
       }
       let hash = hashPayload(req.body.payload);
@@ -45,13 +48,14 @@ export default [
       let status = 200; // OK as default
       req.body.addresses.forEach(async (address: string) => {
         response[address] = { paasResponse: null, executeResponse: null };
-        //@TODO-> return to user lists of invalid endpoints + reason
+        // @TODO-> return to user lists of invalid endpoints + reason
         if (validateAddress(address)) {
+          // @TODO: task = Created
           await controller.insertSubtask({
             task_id: id.id,
-            //TODO-> get from user
+            //@TODO-> get from user
             endpoint_id: 1,
-            status: "PENDING",
+            status: "Created",
           });
 
           try {
@@ -61,6 +65,7 @@ export default [
                 { endpoint_id: req.body.endpoint_id, type: "paas" }
               );
               if (!responsePaaS) {
+                // @TODO: task = QueuedForPermissions
                 responsePaaS = (
                   await axios.post("http://192.168.36.128:5000/PaaS", {
                     address: address,
@@ -82,8 +87,12 @@ export default [
                     microtask_id: responsePaaS.task_id,
                   }
                 );
+              } else {
+                // @TODO: task = Permissions / QueuedForPermissions Depending on existing
               }
             }
+            // TODO: need to add else for empty steps case
+            // @TODO: task = As above OR QueuedForExecute if steps is empty
             const responseExecute = (
               await axios.post("http://localhost:5000/execute", {
                 ip_address: req.body.targets,
@@ -106,6 +115,7 @@ export default [
               }
             );
           } catch (error) {
+            // TODO TODO TODO
             // Passes errors into the error handler
             console.log(error);
           }
@@ -125,6 +135,7 @@ export default [
     path: "/task",
     method: "patch",
     handler: async (req: Request, res: Response) => {
+      // @TODO: task = Execute OR Finished OR UpForRetryExecution OR Failed Depending on patch data
       //console.log(req.body);
       res.send(null);
     },

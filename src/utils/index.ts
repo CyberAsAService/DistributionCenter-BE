@@ -52,6 +52,7 @@ export const hashPayload = (payload: string) => {
     .digest('hex');
 }
 
+// TODO@Talanger : Sounds good doesnt work
 export const loadScriptsMap = () => {
   var scripts: Map<string, String> = new Map();
   var ppath = __dirname.split(path.sep);
