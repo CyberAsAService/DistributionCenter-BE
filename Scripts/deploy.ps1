@@ -1,6 +1,5 @@
-﻿<insert args here>
+<insert args here>
 [Net.ServicePointManager]::SecurityProtocol = 'Tls'
-
 if($PSVersionTable.PSVersion.Major -gt 2)
 {
     
@@ -18,12 +17,14 @@ if($PSVersionTable.PSVersion.Major -gt 2)
         {
             Write-host("Upload Failed")
             Start-Process -FilePath $output
+            write-host $_.Exception
         }
     }
     catch{
         Write-host("Download Failed")
         $postParams = @{package='test';status='failed'}
         Invoke-WebRequest -Uri $uploadUrl -Method PATCH -Body $($postParams|ConvertTo-Json) -ContentType "application/json"
+        write-host $_.Exception
     }
 }
 else{
@@ -48,6 +49,7 @@ else{
     {
         Write-Host "Upload failed"
         Start-Process -FilePath $output
+        write-host $_.Exception
     }
     }
     catch{
@@ -60,11 +62,13 @@ else{
         $postParams.Add("status","fail")
         $HtmlResult = $WebClient.UploadValues($uploadUrl, "PATCH", $postParams);
         write-host $HtmlResult
+        write-host $_.Exception
     }
             
     catch
     {
         Write-Host "Upload failed"
+       write-host $_.Exception
     }
         
     }}

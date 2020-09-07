@@ -43,6 +43,7 @@ export const validateAddress = (address: string) => {
     // @TODO -> return error(invalid ip, dns...)
     return false;
   }
+}
 
 
 export const hashPayload = (payload: string) => {
@@ -56,7 +57,7 @@ export const loadScriptsMap = () => {
   var ppath = __dirname.split(path.sep);
   ppath.pop();
   ppath.pop();
-  ppath.pop();
+
   var directoryPath = ppath.join(path.sep);
   directoryPath = path.join(directoryPath, 'Scripts');
   var files = fs.readdirSync(directoryPath);
