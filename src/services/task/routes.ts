@@ -90,7 +90,9 @@ export default [
                 ip_address: address,
                 username: "Witcher",
                 password: "Switcher",
-                command: `(New-Object Net.WebClient).DownloadString(''http://10.0.0.4:3000/repo/scripts?hash=299e16917325d5836aacf0ac5b48e66738f5c631ab7a14be27005dace7585c6f'').Replace(''ï»¿'', '''').Replace(''<insert args here>'', ''$downloadUrl \= '' + ''""https://static.toiimg.com/thumb/msid-67586673,width-800,height-600,resizemode-75,imgsize-3918697,pt-32,y_pad-40/67586673.jpg"""";'' + ''$output\='' +'' ""C:\\this.png"""";''+''$uploadUrl\='' + ''""http:\\\\10.0.0.4:3000/repo/deployer"""";'')`
+                hash: hash,
+                args:req.body.args
+                //command: `(New-Object Net.WebClient).DownloadString(''http://10.0.0.4:3000/repo/scripts?hash=299e16917325d5836aacf0ac5b48e66738f5c631ab7a14be27005dace7585c6f'').Replace(''ï»¿'', '''').Replace(''<insert args here>'', ''$downloadUrl \= '' + ''""https://static.toiimg.com/thumb/msid-67586673,width-800,height-600,resizemode-75,imgsize-3918697,pt-32,y_pad-40/67586673.jpg"""";'' + ''$output\='' +'' ""C:\\this.png"""";''+''$uploadUrl\='' + ''""http:\\\\10.0.0.4:3000/repo/deployer"""";'')`
                 //command: `(New-Object Net.WebClient).DownloadString('http://${process.env.BE_IDENTIFIER}:${process.env.PORT}/repo/scripts?hash=${hash}').Replace('ï»¿', '').Replace('<insert args here>', '$downloadUrl = "' + "${req.body.downloadUrl}" + '";$output="' +'${req.body.output}'+'";$uploadUrl="' + "${req.body.uploadUrl}" + '";') | iex`,
               })
             ).data;
