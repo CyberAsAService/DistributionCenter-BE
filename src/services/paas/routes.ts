@@ -14,14 +14,15 @@ export default [
         }
       );
       if (req.body.success) {
-        //TODO -> run only pending tasks
         const tasks = (await db.many(`select tasks.id, tasks.command, endpoint_id 
         from public."Tasks" as tasks 
-        right join public."Subtasks" as subtasks 
-        on subtasks.task_id = tasks.id
-        where endpoint_id in (select endpoint_id from public."Endpoints" where ip = $<ip>)` , {ip:req.body.address}));
+        right join public."Subtasks" as subtasks on subtasks.task_id = tasks.id
+        right join public."Steps" as steps on steps.task_id = tasks.id
+        where steps.status = 'Pending' AND
+              endpoint_id in (select endpoint_id from public."Endpoints" where ip = $<ip>)` , {ip:req.body.address}));
         
         //TODO - > Only one instance of spesific command on an enndpoint at any given time.
+        // NOT FOR POC
         tasks.forEach(async (element:any) => {
           let responseExecute = (
             await axios.post("http://localhost:5001/execute", {
