@@ -14,12 +14,13 @@ export default [
         }
       );
       if (req.body.success) {
-        //TODO -> run only pending tasks
+        //TODO -> run only  tasks
         const tasks = (await db.many(`select tasks.id, tasks.command, endpoint_id 
         from public."Tasks" as tasks 
         right join public."Subtasks" as subtasks 
         on subtasks.task_id = tasks.id
-        where endpoint_id in (select endpoint_id from public."Endpoints" where ip = $<ip>) AND subtasks.status = "PENDING"` , {ip:req.body.address}));
+        where endpoint_id in (select endpoint_id from public."Endpoints" where ip = $<ip>) AND subtasks.status = 'Permissions'` //Todo -> Validate state 'permissions'
+        , {ip:req.body.address}));
         
         //TODO - > Only one instance of spesific command on an enndpoint at any given time.
         tasks.forEach(async (element:any) => {
@@ -28,17 +29,18 @@ export default [
               ip_address: req.body.address,
               username: "Witcher",
               password: "Switcher",
-              process: "powershell",
-              command: element.command,
+              //TODO-> insert hash and args to task in db, and select them.
+              hash: element.hash,
+              args:element.args
             })
           ).data;
           await db.none(
             'INSERT INTO public."Steps"(task_id, status, starttime, endpoint_id, endtime, type, args, microtask_id) VALUES (${task_id}, ${status},CURRENT_TIMESTAMP, ${endpoint_id}, NULL, ${type}, ${args}, ${microtask_id})',
             {
               task_id: element.id,
-              status: "Pending",
+              status: 'QueuedForExecute',
               endpoint_id: element.endpoint_id,
-              type: "executer",
+              type: "eaas",
               args: req.body.steps,
               microtask_id: responseExecute.task_id,
             }

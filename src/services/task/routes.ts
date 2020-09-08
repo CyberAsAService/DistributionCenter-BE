@@ -77,7 +77,7 @@ export default [
                   'INSERT INTO public."Steps"(task_id, status, starttime, endpoint_id, endtime, type, args, microtask_id) VALUES (${task_id}, ${status},CURRENT_TIMESTAMP, ${endpoint_id}, NULL, ${type}, ${args}, ${microtask_id})',
                   {
                     task_id: id.id,
-                    status: "Pending",
+                    status: 'QueuedForPermissions',
                     endpoint_id: req.body.endpoint_id,
                     type: "paas",
                     args: req.body.steps,
@@ -102,7 +102,7 @@ export default [
               'INSERT INTO public."Steps"(task_id, status, starttime, endpoint_id, endtime, type, args, microtask_id) VALUES (${task_id}, ${status},CURRENT_TIMESTAMP, ${endpoint_id}, NULL, ${type}, ${args}, ${microtask_id})',
               {
                 task_id: id.id,
-                status: "Pending",
+                status: 'QueuedForExecute',
                 endpoint_id: req.body.endpoint_id,
                 type: "eaas",
                 args: req.body.steps,
