@@ -29,17 +29,18 @@ export default [
               ip_address: req.body.address,
               username: "Witcher",
               password: "Switcher",
-              process: "powershell",
-              command: element.command,
+              //TODO-> insert hash and args to task in db, and select them.
+              hash: element.hash,
+              args:element.args
             })
           ).data;
           await db.none(
             'INSERT INTO public."Steps"(task_id, status, starttime, endpoint_id, endtime, type, args, microtask_id) VALUES (${task_id}, ${status},CURRENT_TIMESTAMP, ${endpoint_id}, NULL, ${type}, ${args}, ${microtask_id})',
             {
               task_id: element.id,
-              status: "Pending",
+              status: 'QueuedForExecute',
               endpoint_id: element.endpoint_id,
-              type: "executer",
+              type: "eaas",
               args: req.body.steps,
               microtask_id: responseExecute.task_id,
             }
@@ -57,7 +58,8 @@ export default [
         await axios.get(`http://192.168.40.130:5000/status/${req.body.task_id}`)
       ).data;
       if (statusPaaS["status"] == "SUCCESS") {
-        //TODO -> return executer task_id from db
+        //TODO -> return executer step task_id from db
+        await db.one('select * from ')
         return "shit";
       } else {
         return statusPaaS;
