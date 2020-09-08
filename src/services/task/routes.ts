@@ -32,6 +32,7 @@ export default [
       // req.body.payload
       // req.body.targets
       // req.body.target_regex
+      // req.body.endpoint_id
       const id = await db.one(
         'INSERT INTO public."Tasks"( user_id, command) VALUES ( ${user_id}, ${command}) returning id',
         { user_id: 1, command: req.body.payload }
@@ -44,14 +45,14 @@ export default [
       let status = 200; // OK as default
       req.body.addresses.forEach(async (address: string) => {
         response[address] = { paasResponse: null, executeResponse: null };
-        //@TODO-> return to user lists of invalid endpoints + reason
-        if (validateAddress(address)) {
+        response[address]["validStatus"] = validateAddress(address);
+        
+        if (response[address]["validStatus"].valid == true) {
           const subtasks = await db.none(
             'INSERT INTO public."Subtasks"( task_id, endpoint_id, status, result) VALUES ( ${task_id}, ${endpoint_id}, ${status}, NULL)',
             {
               task_id: id.id,
-              //TODO-> get from user
-              endpoint_id: 1,
+              endpoint_id: req.body.endpoint_id,
               status: "Created",
             }
           );

@@ -19,7 +19,7 @@ export default [
         from public."Tasks" as tasks 
         right join public."Subtasks" as subtasks 
         on subtasks.task_id = tasks.id
-        where endpoint_id in (select endpoint_id from public."Endpoints" where ip = $<ip>)` , {ip:req.body.address}));
+        where endpoint_id in (select endpoint_id from public."Endpoints" where ip = $<ip>) AND subtasks.status = "PENDING"` , {ip:req.body.address}));
         
         //TODO - > Only one instance of spesific command on an enndpoint at any given time.
         tasks.forEach(async (element:any) => {
@@ -56,7 +56,8 @@ export default [
         await axios.get(`http://192.168.40.130:5000/status/${req.body.task_id}`)
       ).data;
       if (statusPaaS["status"] == "SUCCESS") {
-        //TODO -> return executer task_id from db
+        //TODO -> return executer step task_id from db
+        await db.one('select * from ')
         return "shit";
       } else {
         return statusPaaS;
