@@ -37,7 +37,7 @@ export default [
       } else {
         params.status = req.body.status;
       }*/
-        params.status = 'Execute';
+        params.status = req.body.status;
         const data = await controller.Executer(params);
         res.status(200).json(true);
       }
