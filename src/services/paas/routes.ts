@@ -9,6 +9,7 @@ export default [
       await db.none(
         'UPDATE public."Steps" SET endtime=CURRENT_TIMESTAMP, status=${status} WHERE microtask_id = ${step_id}',
         {
+          //TODO - > status can be more then success or failed
           status: req.body.success ? "success" : "failed",
           step_id: req.body.task_id,
         }
@@ -18,7 +19,7 @@ export default [
         from public."Tasks" as tasks 
         right join public."Subtasks" as subtasks on subtasks.task_id = tasks.id
         right join public."Steps" as steps on steps.task_id = tasks.id
-        where steps.status = 'Pending' AND
+        where steps.status = 'Permissions' AND
               endpoint_id in (select endpoint_id from public."Endpoints" where ip = $<ip>)` , {ip:req.body.address}));
         
         //TODO - > Only one instance of spesific command on an enndpoint at any given time.
@@ -40,7 +41,7 @@ export default [
               task_id: element.id,
               status: 'QueuedForExecute',
               endpoint_id: element.endpoint_id,
-              type: "eaas",
+              type: "Execution",
               args: req.body.steps,
               microtask_id: responseExecute.task_id,
             }

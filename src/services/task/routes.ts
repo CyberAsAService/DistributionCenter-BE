@@ -89,6 +89,7 @@ export default [
                 );
               }
             }
+            //TODO->if else logic
             const responseExecute = (
               await axios.post("http://localhost:5001/execute", {
                 ip_address: address,
@@ -107,7 +108,7 @@ export default [
                 task_id: id.id,
                 status: 'QueuedForExecute',
                 endpoint_id: req.body.endpoint_id,
-                type: "eaas",
+                type: "Execution",
                 args: req.body.steps,
                 microtask_id: responseExecute.task_id,
               }
