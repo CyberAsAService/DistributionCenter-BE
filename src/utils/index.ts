@@ -39,8 +39,6 @@ export const validateAddress = (address: string) => {
   if (IP_REGEX.test(address)) {
     return {valid: true, reason: null};
   } else {
-    // TODO: add testing for endpoint name (in the domain)
-    // @TODO -> return error(invalid ip, dns...)
     return {valid: false, reason: "Invalid IP"};
   }
 }

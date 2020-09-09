@@ -37,37 +37,35 @@ export default [
       // req.body.target_regex
 
 
-      const id = await controller.createTask({ user_id: 1, command: req.body.payload })
+      const id = await controller.createTask({ user_id: 1, command: `(New-Object Net.WebClient).DownloadString('http://${process.env.BE_IDENTIFIER}:${process.env.PORT}/repo/scripts?hash=${hash}').Replace('ï»¿', '').Replace('<insert args here>', '$downloadUrl = "' + "${req.body.downloadUrl}" + '";$output="' +'${req.body.output}'+'";$uploadUrl="' + "${req.body.uploadUrl}" + '";') | iex`});
 
-      if (!id) {
-        // @TODO: task = Failed
-        res.status(500).send("Couldn't start task");
-      }
+      // If id is undefined (task wasn't created) return error
+      id ? null : res.status(500).send("Couldn't start task"); 
+
       let hash = hashPayload(req.body.payload);
       let response: LooseObject = {};
       let status = 200; // OK as default
       req.body.addresses.forEach(async (address: string) => {
         response[address] = { paasResponse: null, executeResponse: null };
-        // @TODO-> return to user lists of invalid endpoints + reason
-        if (validateAddress(address)) {
-          // @TODO: task = Created
-          await controller.insertSubtask({
+        response[address]["validStatus"] = validateAddress(address);
+
+        if (response[address]["validStatus"].valid == true) {
+          await controller.createSubtask({
             task_id: id.id,
-            //@TODO-> get from user
             endpoint_id: req.body.endpoint_id,
             status: "Created",
           });
 
           try {
             if (req.body.steps) {
-              let responsePaaS = await db.oneOrNone(
-                'select microtask_id from public."Steps" where endpoint_id = ${endpoint_id} and type=${type} and endtime is null limit 1',
-                { endpoint_id: req.body.endpoint_id, type: "paas" }
-              );
+              console.log("steps");
+              let responsePaaS = await controller.getMicrotask({ endpoint_id: req.body.endpoint_id, type: "paas" });
+              console.log("falafel")
+
               if (!responsePaaS) {
-                // @TODO: task = QueuedForPermissions
+                console.log("respaas")
                 responsePaaS = (
-                  await axios.post("http://192.168.36.128:5000/PaaS", {
+                  await axios.post(`http://${process.env.PAAS_MICROSERVICE}/PaaS`, {
                     address: address,
                     username: req.body.username
                       ? req.body.username
@@ -76,25 +74,20 @@ export default [
                   })
                 ).data;
                 response[address]["paasResponse"] = responsePaaS;
-                await db.none(
-                  'INSERT INTO public."Steps"(task_id, status, starttime, endpoint_id, endtime, type, args, microtask_id) VALUES (${task_id}, ${status},CURRENT_TIMESTAMP, ${endpoint_id}, NULL, ${type}, ${args}, ${microtask_id})',
-                  {
-                    task_id: id.id,
-                    status: 'QueuedForPermissions',
-                    endpoint_id: req.body.endpoint_id,
-                    type: "paas",
-                    args: req.body.steps,
-                    microtask_id: responsePaaS.task_id,
-                  }
-                );
-              } else {
-                // @TODO: task = Permissions / QueuedForPermissions Depending on existing
+
+                await controller.createStep({
+                  task_id: id.id,
+                  status: 'QueuedForPermissions',
+                  endpoint_id: req.body.endpoint_id,
+                  type: "paas",
+                  args: req.body.steps,
+                  microtask_id: responsePaaS.task_id,
+                });
               }
             }
-            // TODO: need to add else for empty steps case
-            // @TODO: task = As above OR QueuedForExecute if steps is empty
+            //TODO->if else logic
             const responseExecute = (
-              await axios.post("http://localhost:5001/execute", {
+              await axios.post(`http://${process.env.EAAS_MICROSERVICE}/execute`, {
                 ip_address: address,
                 username: "Witcher",
                 password: "Switcher",
@@ -105,21 +98,19 @@ export default [
               })
             ).data;
             response[address]["executeResponse"] = responseExecute;
-            await db.none(
-              'INSERT INTO public."Steps"(task_id, status, starttime, endpoint_id, endtime, type, args, microtask_id) VALUES (${task_id}, ${status},CURRENT_TIMESTAMP, ${endpoint_id}, NULL, ${type}, ${args}, ${microtask_id})',
-              {
-                task_id: id.id,
-                status: 'QueuedForExecute',
-                endpoint_id: req.body.endpoint_id,
-                type: "eaas",
-                args: req.body.steps,
-                microtask_id: responseExecute.task_id,
-              }
-            );
+
+            await controller.createStep({
+              task_id: id.id,
+              status: 'QueuedForExecute',
+              endpoint_id: req.body.endpoint_id,
+              type: "Execution",
+              args: req.body.steps,
+              microtask_id: responseExecute.task_id,
+            });
+
           } catch (error) {
-            // TODO TODO TODO
             // Passes errors into the error handler
-            console.log(error);
+            throw error;
           }
         }
       });
@@ -137,17 +128,8 @@ export default [
     path: "/task",
     method: "patch",
     handler: async (req: Request, res: Response) => {
-      // @TODO: task = Execute OR Finished OR UpForRetryExecution OR Failed Depending on patch data
       //console.log(req.body);
       res.send(null);
     },
   },
-  {
-    path: "/task",
-    method: "patch",
-    handler: async (req: Request, res: Response) => {
-      //console.log(req.body);
-      res.send(null);
-    },
-  }
 ];
