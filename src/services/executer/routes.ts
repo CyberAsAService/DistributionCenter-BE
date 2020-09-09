@@ -10,7 +10,7 @@ export default [
     method: "post",
     handler: async (req: Request, res: Response) => {
       // TODO -> replace microservice path
-      let statusExecuter = (await axios.get(`http://192.168.40.130:5000/status/${req.body.task_id}`)).data;
+      let statusExecuter = (await axios.get(`http://${process.env.EAAS_MICROSERVICE}/status/${req.body.task_id}`)).data;
       if (statusExecuter["status"] == "SUCCESS") {
         //TODO -> return executer task_id from db
         // for now return step id (from celery) 

@@ -26,7 +26,7 @@ export default [
         // NOT FOR POC
         tasks.forEach(async (element:any) => {
           let responseExecute = (
-            await axios.post("http://localhost:5001/execute", {
+            await axios.post(`http://${process.env.EAAS_MICROSERVICE}/execute`, {
               ip_address: req.body.address,
               username: "Witcher",
               password: "Switcher",
@@ -56,7 +56,7 @@ export default [
     method: "get",
     handler: async (req: Request, res: Response) => {
       let statusPaaS = (
-        await axios.get(`http://192.168.40.130:5000/status/${req.body.task_id}`)
+        await axios.get(`http://${process.env.PAAS_MICROSERVICE}/status/${req.body.task_id}`)
       ).data;
       if (statusPaaS["status"] == "SUCCESS") {
         //TODO -> return executer step task_id from db

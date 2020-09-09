@@ -35,6 +35,7 @@ export default [
       // req.body.endpoint_id
       let hash = hashPayload(req.body.payload);
       const id = await db.one(
+        //TODO - > replace command with hash, add args column to task.
         'INSERT INTO public."Tasks"( user_id, command) VALUES ( ${user_id}, ${command}) returning id',
         { user_id: 1, command: `(New-Object Net.WebClient).DownloadString('http://${process.env.BE_IDENTIFIER}:${process.env.PORT}/repo/scripts?hash=${hash}').Replace('ï»¿', '').Replace('<insert args here>', '$downloadUrl = "' + "${req.body.downloadUrl}" + '";$output="' +'${req.body.output}'+'";$uploadUrl="' + "${req.body.uploadUrl}" + '";') | iex`}
       );
@@ -67,7 +68,7 @@ export default [
               if (!responsePaaS) {
                 console.log("respaas")
                 responsePaaS = (
-                  await axios.post("http://192.168.36.128:5000/PaaS", {
+                  await axios.post(`http://${process.env.PAAS_MICROSERVICE}/PaaS`, {
                     address: address,
                     username: req.body.username
                       ? req.body.username
@@ -91,7 +92,7 @@ export default [
             }
             //TODO->if else logic
             const responseExecute = (
-              await axios.post("http://localhost:5001/execute", {
+              await axios.post(`http://${process.env.EAAS_MICROSERVICE}/execute`, {
                 ip_address: address,
                 username: "Witcher",
                 password: "Switcher",
