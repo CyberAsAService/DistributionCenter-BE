@@ -27,15 +27,17 @@ export default [
     path: "/Executer",
     method: "patch",
     handler: [
-      pinger,
+      //pinger,
       async (req: Request, res: Response, next: NextFunction) => {
-        let params: LooseObject = { step_id: req.body.task_id };
-        // @TODO: task = Execute / UpRetryExecution / Finished / Failed Depending on patch data
-        if (req.body.executer) {
-          params.status = 'RUNNING';
-        } else {
-          params.status = req.body.status;
-        }
+      let params: LooseObject = {step_id: req.body.task_id};
+      console.log(req.body);
+      
+      /*if(req.body.executer) {
+        params.status = 'RUNNING';
+      } else {
+        params.status = req.body.status;
+      }*/
+        params.status = req.body.status;
         const data = await controller.Executer(params);
         res.status(200).json(true);
       }
