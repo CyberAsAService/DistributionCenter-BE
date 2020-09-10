@@ -1,0 +1,124 @@
+version: '3.7'
+services:
+    redis:
+        image: 'redis:5.0.5'
+        restart: always
+        #        command: redis-server --requirepass redispass
+        networks:
+          - redis_net
+          - flower_net
+
+    postgres:
+        image: postgres:9.6
+        restart: always
+        environment:
+            - POSTGRES_USER=witcher
+            - POSTGRES_PASSWORD=witcher
+            - POSTGRES_DB=witcher
+        # Uncomment these lines to persist data on the local filesystem.
+            - PGDATA=/var/lib/postgresql/data/pgdata
+        volumes:
+            - ./pgdata:/var/lib/postgresql/data/pgdata
+        networks:
+            - postgres_net
+    
+    backend:
+        image: dc_be:latest
+        build: ./DistributionCenter-BE
+        restart: always
+        # TODO determine if depends_on in good here (we might want the backend to work if one of the microservices is down...)
+        depends_on:
+            - postgres
+            - paas
+              #            - executor
+        environment:
+            - DB_HOST=postgres
+            - DB_PORT=5432
+            - DB_DATABASE=deployer
+            - DB_USER=witcher
+            - DB_PASSWORD=witcher 
+              #            - BE_IDENTIFIER=
+            - PAAS_MICROSERVICE=http://paas:5000
+            - EAAS_MICROSERVICE=localhost
+            - PORT=3000
+              #        volumes:
+           # - ./dags:/usr/local/airflow/dags
+            # Uncomment to include custom plugins
+            # - ./plugins:/usr/local/airflow/plugins
+        networks:
+          - postgres_net
+          - frontend_net
+          - paas_net
+          - executor_net
+          - redis_net
+    
+    frontend:
+        image: dc_front:latest
+        build: ./DistributionCenter-FE
+        restart: always
+        environment:
+            - LOAD_EX=n
+        volumes:
+            - ./dags:/usr/local/airflow/dags
+        ports:
+            - "80:80"
+            - "443:443"
+        networks:
+            - frontend_net
+            
+    # TODO
+    paas:
+        image: dc_paas:latest
+        build: ./PermissionsAsAService
+        restart: always
+        command: webserver
+        depends_on:
+            - redis
+        environment:
+            - REDIS=redis
+            - PORT=5000
+            - UPDATE_ADDRESS=http://backend:3000
+        volumes:
+            - ./dags:/usr/local/airflow/dags
+        networks:
+          - paas_net
+          - redis_net
+
+    paas_flower:
+        image: dc_paas:latest
+        restart: always
+        command: flower
+        depends_on:
+            - redis
+        environment:
+            - REDIS=redis
+            - PORT=5000
+            - UPDATE_ADDRESS=http://backend:3000
+        ports:
+            - "5555:5555"
+        networks:
+          - flower_net
+    
+    paas_worker:
+        image: dc_paas:latest
+        restart: always
+        command: worker
+        depends_on:
+            - redis
+        environment:
+            - REDIS=redis
+            - PORT=5000
+            - UPDATE_ADDRESS=http://backend:3000
+        networks:
+          - redis_net
+
+networks:
+  redis_net:
+  postgres_net:
+  frontend_net:
+  paas_net:
+  executor_net:
+  flower_net:
+  
+volumes:
+  db_data:
