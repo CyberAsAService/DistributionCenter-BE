@@ -56,6 +56,8 @@ services:
         image: dc_front:latest
         build: ./DistributionCenter-FE
         restart: always
+        depends_on:
+            - backend
         environment:
             - LOAD_EX=n
         volumes:
